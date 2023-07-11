@@ -1,4 +1,4 @@
-import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Text,
@@ -6,12 +6,11 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import { styles } from "./styles";
+import { StatusBar } from "expo-status-bar";
 
-import * as Location from "expo-location";
-import { useEffect, useState } from "react";
+import { styles } from "./styles";
 import { formatDate } from "./util";
-import { API_KEY } from "./config";
+import { getLoacation, getWeather, getCity } from "./api";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -22,54 +21,27 @@ export default function App() {
   const [loadingMsg, setLoadingMsg] = useState("initializing...");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const getLoacation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied");
-      return;
+  const fetchData = async () => {
+    setLoadingMsg("Getting Location...");
+    try {
+      const { latitude, longitude } = await getLoacation();
+
+      const city = await getCity(latitude, longitude);
+      setCity(city);
+
+      setLoadingMsg("Getting Weather...");
+      const data = await getWeather(latitude, longitude);
+      setWeatherData(data);
+
+      setIsLoading(false);
+    } catch (error) {
+      setErrorMsg(error.message);
+      setIsLoading(false);
     }
-
-    const {
-      coords: { latitude, longitude },
-    } = await Location.getCurrentPositionAsync({
-      accuracy: 5,
-    });
-
-    return { latitude, longitude };
-  };
-
-  const getCity = async (latitude, longitude) => {
-    const location = await Location.reverseGeocodeAsync(
-      {
-        latitude,
-        longitude,
-      },
-      { useGoogleMaps: false }
-    );
-    setCity(location[0].city);
-  };
-
-  const getWeather = async (latitude, longitude) => {
-    const response = await fetch(
-      `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&exclude=minutely,hourly,alerts&appid=${API_KEY}&units=metric`
-    );
-    const json = await response.json();
-    setWeatherData(json.daily);
   };
 
   useEffect(() => {
-    (async () => {
-      setLoadingMsg("Getting Location...");
-      const { latitude, longitude } = await getLoacation();
-      if (!latitude || !longitude) {
-        setErrorMsg("Plz restart");
-      }
-      await getCity(latitude, longitude);
-      setLoadingMsg("Getting Weather ...");
-      await getWeather(latitude, longitude);
-
-      setIsLoading(false);
-    })();
+    fetchData();
   }, []);
 
   return (
