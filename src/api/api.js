@@ -1,6 +1,6 @@
 import * as Location from "expo-location";
 
-import { API_KEY } from "./config";
+import { API_KEY } from "../config/config";
 
 export const getLoacation = async () => {
   try {
