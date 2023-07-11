@@ -1,5 +1,11 @@
 import { StatusBar } from "expo-status-bar";
-import { Text, View, ScrollView, Dimensions } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  View,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import { styles } from "./styles";
 
 import * as Location from "expo-location";
@@ -7,12 +13,13 @@ import { useEffect, useState } from "react";
 import { formatDate } from "./util";
 import { API_KEY } from "./config";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function App() {
   const [city, setCity] = useState("");
   const [weatherData, setWeatherData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingMsg, setLoadingMsg] = useState("initializing...");
   const [errorMsg, setErrorMsg] = useState("");
 
   const getLoacation = async () => {
@@ -52,11 +59,13 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
+      setLoadingMsg("Getting Location...");
       const { latitude, longitude } = await getLoacation();
       if (!latitude || !longitude) {
         setErrorMsg("Plz restart");
       }
       await getCity(latitude, longitude);
+      setLoadingMsg("Getting Weather ...");
       await getWeather(latitude, longitude);
 
       setIsLoading(false);
@@ -65,14 +74,18 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      {isLoading && (
+        <View style={styles.loading_container}>
+          <ActivityIndicator size="large" color="#1f2937" />
+          <Text style={styles.loading_text}>{loadingMsg}</Text>
+        </View>
+      )}
       {!isLoading && (
         <View style={styles.header}>
           <Text style={styles.city}>{city}</Text>
         </View>
       )}
-      {isLoading ? (
-        <View></View>
-      ) : (
+      {!isLoading && (
         <ScrollView
           horizontal
           pagingEnabled
@@ -88,10 +101,9 @@ export default function App() {
             } = daily;
             const { day, month, date } = formatDate(dt);
             let backgroundColor;
-            let textColor;
+            const textColor = "#1f2937";
             if (main == "Rain" || main == "Drizzle") {
               backgroundColor = "#38bdf8";
-              textColor = "black";
             }
             if (main == "Snow") {
               backgroundColor = "#d1d5db";
@@ -123,7 +135,7 @@ export default function App() {
                     {Math.floor(today)}°
                   </Text>
                   <Text style={{ ...styles.desc, color: textColor }}>
-                    {main}
+                    {main == "Clear" ? "Sunny" : main}
                   </Text>
                 </View>
                 <View style={styles.detail_container}>

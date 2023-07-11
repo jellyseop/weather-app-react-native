@@ -16,6 +16,17 @@ export const styles = StyleSheet.create({
     zIndex: 1,
     backgroundColor: "rgba(255, 255, 255, 0)",
   },
+  loading_container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loading_text: {
+    marginTop: 15,
+    fontSize: 20,
+    color: "#4b5563",
+    fontWeight: "500",
+  },
   date_container: {
     flex: 1,
     justifyContent: "center",
