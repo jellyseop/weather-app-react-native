@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { getLoacation, getWeather, getCity } from "./src/api/api";
 import { styles } from "./src/styles/globalStyles";
 
+import ErrorComponent from "./src/components/common/ErrorComponent";
 import LoadingIndicator from "./src/components/common/LoadingIndicator";
 import WeatherCard from "./src/components/weather/WeatherCard";
 
@@ -13,7 +14,7 @@ export default function App() {
   const [weatherData, setWeatherData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState("initializing...");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const fetchData = async () => {
     setLoadingMsg("Getting Location...");
@@ -38,24 +39,33 @@ export default function App() {
     fetchData();
   }, []);
 
+  if (errorMsg) {
+    return (
+      <View style={styles.error_container}>
+        <ErrorComponent errorMsg={errorMsg} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {isLoading && <LoadingIndicator loadingMsg={loadingMsg} />}
-      {!isLoading && (
-        <View style={styles.header}>
-          <Text style={styles.city}>{city}</Text>
-        </View>
-      )}
-      {!isLoading && (
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-        >
-          {weatherData.map((daily, index) => (
-            <WeatherCard daily={daily} key={index} />
-          ))}
-        </ScrollView>
+      {isLoading ? (
+        <LoadingIndicator loadingMsg={loadingMsg} />
+      ) : (
+        <>
+          <View style={styles.header}>
+            <Text style={styles.city}>{city}</Text>
+          </View>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+          >
+            {weatherData.map((daily, index) => (
+              <WeatherCard daily={daily} key={index} />
+            ))}
+          </ScrollView>
+        </>
       )}
       <StatusBar style="auto" />
     </View>
