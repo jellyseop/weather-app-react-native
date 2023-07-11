@@ -1,15 +1,20 @@
 import { StyleSheet } from "react-native";
-//FFF338
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
+    backgroundColor: "transparent",
   },
-  appBar: {
+  header: {
+    position: "absolute", // position header absolutely
+    top: 0,
+    left: 0,
+    width: "100%",
     height: 100,
     justifyContent: "flex-end",
     alignItems: "center",
+    zIndex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0)",
   },
   date_container: {
     flex: 1,
